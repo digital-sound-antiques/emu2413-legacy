@@ -16,16 +16,16 @@
 #define MSX_CLK 3579545
 
 #define SAMPLERATE 44100
-#define DATALENGTH (SAMPLERATE*2) 
+#define DATALENGTH (SAMPLERATE*8) 
 
-static void WORD(char *buf, uint32 data){
+static void WORD(char *buf, e_uint32 data){
 
   buf[0] = data & 0xff ;
   buf[1] = (data & 0xff00) >> 8 ;
 
 }
 
-static void DWORD(char *buf, uint32 data){
+static void DWORD(char *buf, e_uint32 data){
 
   buf[0] = data & 0xff ;
   buf[1] = (data & 0xff00) >> 8 ;
@@ -48,7 +48,7 @@ int main(void){
   static char wave[DATALENGTH*2] ;
   char filename[16] = "temp.wav" ;
   char header[46] ;
-  int i ;
+  int i;
   clock_t start,finish ;
 
   FILE *fp ;
@@ -69,24 +69,23 @@ int main(void){
   chunkID(header+36,"data") ;
   DWORD(header+40,2*DATALENGTH) ;
 
-  OPLL_init(MSX_CLK,SAMPLERATE) ;
-  opll = OPLL_new() ;
-  OPLL_reset(opll) ;
-  OPLL_reset_patch(opll,0) ;            /* if use default voice data. */ 
-
+  opll = OPLL_new(MSX_CLK,SAMPLERATE) ;
+  OPLL_reset(opll);
   OPLL_writeReg(opll,0x30,0x30) ;   /* select PIANO Voice to ch1. */ 
-  OPLL_writeReg(opll,0x10,80) ;     /* set F-Number(L). */
+  OPLL_writeReg(opll,0x10,0x80) ;   /* set F-Number(L). */
   OPLL_writeReg(opll,0x20,0x15) ;   /* set BLK & F-Number(H) and keyon. */
 
   start = clock() ;
 
+  i=0;
+
   for(i=0;i<DATALENGTH;i++)
+  {
     WORD(wave+i*2,OPLL_calc(opll));
+  }
 
   finish = clock() ;
-
   OPLL_delete(opll) ;
-  OPLL_close() ;
 
   printf("It has been %f sec to calc %d waves.\n",
 	 (double)(finish-start)/CLOCKS_PER_SEC, DATALENGTH) ;

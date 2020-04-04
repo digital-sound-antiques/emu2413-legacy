@@ -2,11 +2,21 @@
 #define _EMUTYPES_H_
 
 #if defined(_MSC_VER)
-#include <crtdbg.h>
+#define INLINE __forceinline
+#elif defined(__GNUC__)
+#define INLINE __inline__
+#elif defined(_MWERKS_)
+#define INLINE inline
+#else
+#define INLINE
 #endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+typedef unsigned int e_uint;
+typedef signed int e_int;
 
 typedef unsigned char e_uint8 ;
 typedef signed char e_int8 ;
